@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/dracula.min.css">
+
+</head>
+
+<body>
+    <div class="container my-5">
+        <h1 class="mb-6 m-6">スニペット作成用</h1>
+        <form id="myForm" class="mb-4" style="width: 100%;">
+            <div class="mb-3">
+                <label for="language" class="form-label">言語選択</label>
+                <select id="language" class="form-select" aria-label="言語選択">
+                    <option value="javascript">JavaScript</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="python" selected>Python</option>
+                    <option value="dart">Dart</option>
+                    <option value="c">C</option>
+                    <option value="cpp">C++</option>
+                    <option value="java">Java</option>
+                    <option value="html">HTML</option>
+                    <option value="css">CSS</option>
+                    <option value="restructuredtext">reStructuredText</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input class="form-control" name="title" id="title">
+            </div>
+            <div class="mb-3">
+                <label for="prefix" class="form-label">Prefix</label>
+                <input class="form-control" name="prefix" id="prefix">
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <input class="form-control" name="description" id="description">
+            </div>
+            <div class="mb-3">
+                <label for="name" class="form-label">コード</label>
+                <textarea class="form-control code-block" name="hello" id="content" rows="5"></textarea>
+            </div>
+            <div class="mb-3">
+                <pre>
+                    <code id="code_compile" class="language-javascript"></code>
+                </pre>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="submitForm()">作成</button>
+        </form>
+
+        <h4 class="mb-3">Snippet</h5>
+            <button type="button" class="btn btn-secondary" onclick="copySnippet()" id="btn_copy"
+                style="display: none;">コピー</button>
+            <div id="preview" class="border p-3 rounded bg-light my-3" style="width: 100%;">
+                <p class="text-muted" id="text-muted"></p>
+            </div>
+    </div>
+    <style>
+    </style>
+
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js"></script>
+    <script>
+        // ハイライトを実行
+        hljs.initHighlightingOnLoad();
+    </script>
+    <script>
+        document.getElementById("content").addEventListener('input', (e) => {
+            document.getElementById("code_compile").textContent = e.target.value;
+            hljs.highlightBlock(document.getElementById("code_compile"));
+            updateHighlighting();
+        })
+
+        document.getElementById("language").addEventListener("input", () => {
+            updateHighlighting();
+        })
+
+        // コードのハイライトを更新する関数
+        function updateHighlighting() {
+            const language = document.getElementById("language").value;
+            const codeElement = document.getElementById("code_compile");
+            codeElement.className = `language-${language}`;
+            hljs.highlightBlock(codeElement);
+        }
+
+        // テキストエリアでタブキーを押したときにインデントを追加する関数
+        document.getElementById("content").addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const textarea = e.target;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                // インデントを追加
+                // 選択箇所までの部分＋インデント＋ゴールまで
+                textarea.value = textarea.value.substring(0, start) + '    ' + textarea.value.substring(end);
+                // カーソル位置を更新
+                textarea.selectionStart = textarea.selectionEnd = start + 4;
+            }
+        });
+
+        function submitForm() {
+            // body部分の作成
+            let content = document.getElementById("content").value
+            var contentLines = content.split('\n');
+            var outArray = new Array();
+
+            for (var i = 0; i < contentLines.length; i++) {
+                outArray.push(contentLines[i]);
+            }
+            console.log(outArray);
+            var bodyContent = `"body":[<br>`;
+            outArray.forEach((el) => {
+                let escapedEl = el.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/ /g, "&nbsp;");
+                bodyContent += `&emsp;&emsp;&emsp;&emsp;"${escapedEl}",<br>`
+            });
+            bodyContent += `&emsp;&emsp;],`;
+
+            // title
+            let title = document.getElementById("title").value;
+            // prefix
+            let prefix = document.getElementById("prefix").value;
+            // description
+            let description = document.getElementById("description").value;
+
+            let snippetContent = `"${title}":{<br>&emsp;"prefix": "${prefix}",<br>&emsp;&emsp;${bodyContent}<br>&emsp;"description": "${description}",<br>}`
+            document.getElementById("text-muted").innerHTML = snippetContent;
+            document.getElementById("btn_copy").style.display = "flex";
+        }
+
+        function copySnippet() {
+            element = document.getElementById("text-muted")
+            navigator.clipboard.writeText(element.innerText);
+        }
+    </script>
+</body>
+
+</html>
