@@ -43,7 +43,7 @@
             </div>
             <div class="mb-3">
                 <label for="name" class="form-label">コード</label>
-                <textarea class="form-control code-block" name="hello" id="content" rows="5"></textarea>
+                <textarea class="form-control code-block" name="hello" id="content" rows="10"></textarea>
             </div>
             <div class="mb-3">
                 <pre>
@@ -54,13 +54,26 @@
         </form>
 
         <h4 class="mb-3">Snippet</h5>
-            <button type="button" class="btn btn-secondary" onclick="copySnippet()" id="btn_copy"
-                style="display: none;">コピー</button>
+            <div style="display: flex;">
+                <button type="button" class="btn btn-secondary" onclick="copySnippet()" id="btn_copy"
+                    style="display: none;">コピー</button>
+                <div id="copied">Copied!</div>
+            </div>
             <div id="preview" class="border p-3 rounded bg-light my-3" style="width: 100%;">
                 <p class="text-muted" id="text-muted"></p>
             </div>
     </div>
     <style>
+        #copied {
+            opacity: 0;
+            transition: 1s;
+            color: blue;
+            font-weight: bold;
+            margin-left: 15px;
+            text-align: 20px;
+            font-size: 20px;
+            line-height: 32px;
+        }
     </style>
 
 
@@ -136,6 +149,10 @@
         function copySnippet() {
             element = document.getElementById("text-muted")
             navigator.clipboard.writeText(element.innerText);
+            document.getElementById("copied").style.opacity = "1";
+            setTimeout(() => {
+                document.getElementById("copied").style.opacity = "0";
+            }, 500)
         }
     </script>
 </body>
