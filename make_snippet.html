@@ -118,31 +118,38 @@
         });
 
         function submitForm() {
-            // body部分の作成
-            let content = document.getElementById("content").value
-            var contentLines = content.split('\n');
-            var outArray = new Array();
+            let content = document.getElementById("content").value;
+            let contentLines = content.split('\n');
 
-            for (var i = 0; i < contentLines.length; i++) {
-                outArray.push(contentLines[i]);
-            }
-            console.log(outArray);
-            var bodyContent = `"body":[<br>`;
-            outArray.forEach((el) => {
-                let escapedEl = el.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/ /g, "&nbsp;");
-                bodyContent += `&emsp;&emsp;&emsp;&emsp;"${escapedEl}",<br>`
-            });
-            bodyContent += `&emsp;&emsp;],`;
+            // bodyContentを辞書型で作成
+            let bodyContentArray = contentLines.filter(line => line.trim() !== "");
 
-            // title
+            // title, prefix, descriptionを取得
             let title = document.getElementById("title").value;
-            // prefix
             let prefix = document.getElementById("prefix").value;
-            // description
             let description = document.getElementById("description").value;
 
-            let snippetContent = `"${title}":{<br>&emsp;"prefix": "${prefix}",<br>&emsp;&emsp;${bodyContent}<br>&emsp;"description": "${description}",<br>}`
-            document.getElementById("text-muted").innerHTML = snippetContent;
+            // スニペット内容を辞書型で生成
+            let snippet = {
+                [title]: {
+                    "prefix": prefix,
+                    "body": bodyContentArray,
+                    "description": description
+                }
+            };
+
+            // 辞書型をJSON形式に変換
+            let snippetContent = JSON.stringify(snippet, null, 4);
+
+            // 外側の{}を削除し、bodyの空行を削除
+            snippetContent = snippetContent
+                .replace(/^{\n/, '')              // 先頭の{と改行を削除
+                .replace(/\n}$/, '')              // 最後の}と改行を削除
+                .replace(/\[\n\s*/, '[\n')        // bodyの先頭のインデント調整
+                .replace(/\n\s*\]/, '\n]');       // bodyの末尾のインデント調整
+
+            // 生成したJSONを`innerText`で表示
+            document.getElementById("text-muted").textContent = snippetContent;
             document.getElementById("btn_copy").style.display = "flex";
         }
 
